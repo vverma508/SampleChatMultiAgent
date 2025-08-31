@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.64.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Agents.Orchestration" Version="1.64.0-preview" />
     <PackageReference Include="Microsoft.SemanticKernel.Agents.Runtime.InProcess" Version="1.64.0-preview" />
+	<PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.4" />
   </ItemGroup>
 
 </Project>

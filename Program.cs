@@ -9,6 +9,14 @@ using SampleChatMultiAgent.Plugins;
 
 Console.WriteLine("Hello, AI Sample Test App!");
 
+
+#region Usage of MCP client
+await McpAgentClientFactory.CreateMcpClientAsync();
+
+#endregion
+return;
+
+#region Setup Kernel and Plugins for multi -agent orchestration
 var kernel = KernalFactory.GetKernel();
 kernel.Plugins.AddFromType<ProjectDetailsPlugin>();
 
@@ -20,8 +28,8 @@ var agent1 = projectFinderAgent.CreateProjectFinderAgent(kernel, loggerFactory);
 #pragma warning disable SKEXP0130 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 SequentialOrchestration sequentialOrchestration = new SequentialOrchestration(agent1)
 {
-    Description="This is a sequentials orchetration",
-    Name="test orch"
+    Description = "This is a sequentials orchetration",
+    Name = "test orch"
 };
 
 InProcessRuntime inProcessRuntime = new InProcessRuntime();
@@ -35,3 +43,4 @@ Console.WriteLine(finalResult);
 
 await inProcessRuntime.RunUntilIdleAsync();
 
+#endregion
