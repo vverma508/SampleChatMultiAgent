@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
+using OpenAI;
 using System;
+using System.ClientModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,6 +34,36 @@ namespace SampleChatMultiAgent
 
             return kernel;
         }
-      
+
+        public static Kernel GetKernel2()
+        {
+            string modelName = "gpt-4o";
+
+            // Add configuration support
+            var configuration = new ConfigurationBuilder()
+                .AddUserSecrets<Program>() // or use your startup class
+                .Build();
+
+            var builder = Kernel.CreateBuilder();//.AddAzureOpenAIChatCompletion(modelName, configuration.GetValue<string>("AzureFoundaryProjectUrl"), configuration.GetValue<string>("AzureFoundaryProjectKey"));
+
+
+            var options = new OpenAIClientOptions()
+            {
+                Endpoint = new Uri(configuration.GetValue<string>("AzureFoundaryProjectUrl"))
+            };
+
+            var creds= new ApiKeyCredential(configuration.GetValue<string>("AzureFoundaryProjectKey"));
+            var client = new OpenAIClient(creds, options);
+            builder.AddOpenAIChatCompletion(modelName,client);
+
+            // Add enterprise components
+            builder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Debug));
+
+            // Build the kernel
+            Kernel kernel = builder.Build();
+
+            return kernel;
+        }
+
     }
 }

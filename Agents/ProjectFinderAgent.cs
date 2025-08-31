@@ -1,17 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
-using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using SampleChatMultiAgent.Plugins;
-using SampleChatMultiAgent.Resources;
 
 namespace SampleChatMultiAgent.Agents
 {
     public class ProjectFinderAgent
     {
 
-        public const string AgentName = "ProjectFinderAgent";
+        public const string AgentName = "Agent156";
 
         public ChatCompletionAgent CreateProjectFinderAgent(Kernel kernel, ILoggerFactory loggerFactory)
         {
@@ -21,8 +19,10 @@ namespace SampleChatMultiAgent.Agents
 
             return new ChatCompletionAgent
             {
+
+                Name = AgentName,
                 Kernel = kernel.Clone(),
-                
+                Description = "An agent which helps finding project details from a structured dataset",
                 Instructions = """
                                 You are ProjectFinderAgent, an intelligent assistant designed to help users explore and retrieve project-related information from a structured dataset. Your primary goal is to understand natural language queries and return relevant project details such as project name, team, description, developer lead, architect, and product owner.
 
@@ -51,20 +51,13 @@ namespace SampleChatMultiAgent.Agents
                                     You are not just a search tool—you are a smart, conversational agent that makes project discovery intuitive and engaging.
                 
                 """,
-                Name = AgentName,
                 Arguments = new KernelArguments
                 (
-                    //new AzureOpenAIPromptExecutionSettings()
-                    //{
-                    //    FunctionChoiceBehavior = FunctionChoiceBehavior.Required([projectDetails, projectDetailsByName])
-                    //}
                     new AzureOpenAIPromptExecutionSettings()
                     {
                         FunctionChoiceBehavior = FunctionChoiceBehavior.Auto([projectDetails, projectDetailsByName])
                     }
-                ),
-                LoggerFactory = loggerFactory
-                
+                )
             };
         }
     }
