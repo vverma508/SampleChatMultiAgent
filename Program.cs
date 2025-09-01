@@ -11,7 +11,20 @@ Console.WriteLine("Hello, AI Sample Test App!");
 
 
 #region Usage of MCP client
-await McpAgentClientFactory.CreateMcpClientAsync();
+var kernel1= await McpAgentClientFactory.CreateMcpClientAsync();
+
+var getProjectDetailsFunction = kernel1.Plugins.GetFunction("Tools", "GetProjectDetails");
+var getProjectDetailsByNameFunction = kernel1.Plugins.GetFunction("Tools", "GetProjectDetailsByName");
+
+var prompt = "Show me all projects led by Alice";
+
+ProjectFinderAgent projectFinderAgent1 = new ProjectFinderAgent();
+var chatAgent = projectFinderAgent1.CreateProjectFinderMcpClientAgent(kernel1, kernel1.GetRequiredService<ILoggerFactory>(), [getProjectDetailsFunction, getProjectDetailsByNameFunction]);
+await foreach (var response in chatAgent.InvokeAsync(prompt))
+{
+    // You can process each response here, for example:
+    Console.WriteLine(response.Message);
+}
 
 #endregion
 return;

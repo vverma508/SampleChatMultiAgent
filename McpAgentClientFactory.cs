@@ -1,16 +1,14 @@
-﻿using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
 using ModelContextProtocol.Client;
-using OpenAI;
-using System.ClientModel;
 
 namespace SampleChatMultiAgent
 {
     public static class McpAgentClientFactory
     {
-        public static async Task CreateMcpClientAsync()
+        public static async Task<Kernel> CreateMcpClientAsync()
         {
 
             await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(new StdioClientTransport(new()
@@ -31,31 +29,16 @@ namespace SampleChatMultiAgent
             IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
             kernelBuilder.Plugins.AddFromFunctions("Tools", tools.Select(aiFunction => aiFunction.AsKernelFunction()));
 
-            var options = new OpenAIClientOptions()
-            {
-                Endpoint = new Uri(configuration.GetValue<string>("AzureFoundaryProjectUrl"))
-            };
+            // Add enterprise components
+            kernelBuilder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Debug));
 
             string modelName = "gpt-4o";
 
-            var creds = new ApiKeyCredential(configuration.GetValue<string>("AzureFoundaryProjectKey"));
-            var client = new OpenAIClient(creds, options);
-            kernelBuilder.AddOpenAIChatCompletion(modelName, client);
+            kernelBuilder.AddAzureOpenAIChatCompletion(modelName, configuration.GetValue<string>("AzureFoundaryProjectUrl"), configuration.GetValue<string>("AzureFoundaryProjectKey"));
 
             Kernel kernel = kernelBuilder.Build();
-
-            var a = kernel.Plugins.GetFunction("Tools", "GetProjectDetails");
-            var b = kernel.Plugins.GetFunction("Tools", "GetProjectDetailsByName");
-
-            OpenAIPromptExecutionSettings executionSettings = new()
-            {
-                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto([a,b])
-            };
-
-            // Execute a prompt using the MCP tools. The AI model will automatically call the appropriate MCP tools to answer the prompt.
-            var prompt = "Show me all projects led by Alice";
-            var result = await kernel.InvokePromptAsync(prompt, new(executionSettings));
-            Console.WriteLine(result);
+            return kernel;
+           
         }
     }
 }
